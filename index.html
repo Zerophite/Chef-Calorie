@@ -1,0 +1,1249 @@
+<title>Chef Calorie</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Figtree:wght@400;600;700&display=swap">
+<style>
+  :root{
+    --bg:#FBF7F0; --surface:#FFFFFF; --surface-2:#F3ECE0; --surface-3:#EFE6D6;
+    --ink:#241F1A; --muted:#7A6F62; --line:#E7DCCC; --line-strong:#D8CAB4;
+    --accent:#C6412A; --accent-ink:#FFFFFF; --accent-soft:#F7E4DE;
+    --green:#3F7D53; --green-soft:#E3EEE4;
+    --amber:#B5811F; --amber-soft:#F6EACD;
+    --pro:#2F6E8F; --pro-soft:#E1EDF2;
+    --carb:#A9762A; --carb-soft:#F4EAD7;
+    --fat:#7E57A6; --fat-soft:#EDE6F4;
+    --shadow:0 1px 2px rgba(60,45,25,.06),0 8px 24px rgba(60,45,25,.06);
+    --r:14px; --r-sm:9px;
+    --display:"Fraunces",Georgia,"Times New Roman",serif;
+    --body:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#17140F; --surface:#201C16; --surface-2:#2A241C; --surface-3:#332B20;
+    --ink:#F2EBE0; --muted:#A99B88; --line:#352E24; --line-strong:#453B2C;
+    --accent:#E4613F; --accent-ink:#1A130F; --accent-soft:#3A251D;
+    --green:#6FB283; --green-soft:#233026;
+    --amber:#D9A24A; --amber-soft:#352A18;
+    --pro:#6FB6D6; --pro-soft:#1E2A31;
+    --carb:#D9A24A; --carb-soft:#312A1B;
+    --fat:#B79AD8; --fat-soft:#292233;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#17140F; --surface:#201C16; --surface-2:#2A241C; --surface-3:#332B20;
+    --ink:#F2EBE0; --muted:#A99B88; --line:#352E24; --line-strong:#453B2C;
+    --accent:#E4613F; --accent-ink:#1A130F; --accent-soft:#3A251D;
+    --green:#6FB283; --green-soft:#233026;
+    --amber:#D9A24A; --amber-soft:#352A18;
+    --pro:#6FB6D6; --pro-soft:#1E2A31;
+    --carb:#D9A24A; --carb-soft:#312A1B;
+    --fat:#B79AD8; --fat-soft:#292233;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .num{font-variant-numeric:tabular-nums}
+  button{font-family:inherit;cursor:pointer}
+  input{font-family:inherit;color:inherit}
+  ::selection{background:var(--accent-soft)}
+
+  .wrap{max-width:940px;margin:0 auto;padding-block:22px 60px;padding-left:16px;padding-right:16px;}
+
+  /* Header */
+  header.app{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+  .brand{display:flex;align-items:center;gap:13px}
+  .mark{width:44px;height:44px;border-radius:12px;background:var(--accent);color:var(--accent-ink);
+    display:grid;place-items:center;flex:none;box-shadow:var(--shadow)}
+  .mark svg{width:26px;height:26px}
+  .brand h1{font-family:var(--display);font-weight:600;font-size:28px;line-height:1;margin:0;letter-spacing:-.01em}
+  .brand p{margin:5px 0 0;color:var(--muted);font-size:13px}
+  .brand em{font-style:normal;color:var(--accent);font-weight:600}
+
+  /* Tabs */
+  .tabsbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+  .tab{display:inline-flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);
+    color:var(--muted);padding:8px 10px 8px 14px;border-radius:999px;font-size:14px;font-weight:600;transition:.12s}
+  .tab:hover{border-color:var(--line-strong)}
+  .tab.active{background:var(--surface);color:var(--ink);border-color:var(--accent);box-shadow:var(--shadow)}
+  .tab .kc{font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);
+    padding:2px 7px;border-radius:999px}
+  .tab.active .kc{}
+  .tab .name{background:none;border:none;color:inherit;font:inherit;padding:0;max-width:150px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tab .x{border:none;background:none;color:var(--muted);width:18px;height:18px;border-radius:50%;
+    display:grid;place-items:center;font-size:15px;line-height:1;opacity:.6}
+  .tab .x:hover{background:var(--accent);color:var(--accent-ink);opacity:1}
+  .tab-add{border:1px dashed var(--line-strong);background:none;color:var(--muted);border-radius:999px;
+    padding:8px 15px;font-weight:600;font-size:14px}
+  .tab-add:hover{color:var(--accent);border-color:var(--accent)}
+
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+    padding:18px;margin-bottom:16px}
+  .card > h2{font-family:var(--display);font-weight:600;font-size:17px;margin:0 0 3px;letter-spacing:-.01em}
+  .card > .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+  .eyebrow{text-transform:uppercase;letter-spacing:.09em;font-size:11px;font-weight:700;color:var(--accent);margin:0 0 8px}
+
+  textarea{width:100%;min-height:150px;resize:vertical;border:1px solid var(--line-strong);border-radius:var(--r-sm);
+    background:var(--surface-2);color:var(--ink);padding:12px 13px;font-size:14px;line-height:1.55;outline:none}
+  textarea:focus{border-color:var(--accent);background:var(--surface)}
+  .row-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px;align-items:center}
+
+  .btn{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);padding:9px 15px;
+    border-radius:var(--r-sm);font-weight:600;font-size:14px;transition:.12s}
+  .btn:hover{border-color:var(--line-strong);background:var(--surface-2)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .btn.primary:hover{filter:brightness(1.05)}
+  .btn.ghost{border-color:transparent;color:var(--muted)}
+  .btn.ghost:hover{color:var(--accent);background:var(--accent-soft)}
+  .btn.sm{padding:6px 11px;font-size:13px}
+
+  /* Ingredient table */
+  .tbl-wrap{overflow-x:auto;margin:0 -4px}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+  thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+    font-weight:700;padding:0 10px 8px;border-bottom:1px solid var(--line)}
+  thead th.r,tbody td.r{text-align:right}
+  tbody td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr.unmatched{background:var(--amber-soft)}
+  .ing-name{font-weight:600}
+  .ing-amt{color:var(--muted);font-size:12.5px;margin-top:1px}
+  .cellinput{width:74px;text-align:right;border:1px solid transparent;background:var(--surface-2);border-radius:7px;
+    padding:6px 8px;font-size:14px;font-variant-numeric:tabular-nums}
+  .cellinput:focus{border-color:var(--accent);background:var(--surface);outline:none}
+  td .unit{color:var(--muted);font-size:12px;margin-left:3px}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;
+    text-transform:uppercase;letter-spacing:.04em;vertical-align:middle;margin-left:6px}
+  .badge.ok{background:var(--green-soft);color:var(--green)}
+  .badge.warn{background:var(--amber-soft);color:var(--amber)}
+  .del{border:none;background:none;color:var(--muted);font-size:16px;line-height:1;padding:4px;border-radius:6px}
+  .del:hover{color:var(--accent);background:var(--accent-soft)}
+  .empty{color:var(--muted);text-align:center;padding:26px 10px;font-size:14px}
+
+  /* summary + stat tiles */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+  .tile{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:13px 15px}
+  .tile .k{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+  .tile .v{font-family:var(--display);font-weight:600;font-size:26px;line-height:1.1;margin-top:4px;letter-spacing:-.01em}
+  .tile .v small{font-family:var(--body);font-size:13px;color:var(--muted);font-weight:600;margin-left:3px}
+  .tile.hero{background:var(--accent);border-color:var(--accent)}
+  .tile.hero .k{color:var(--accent-ink);opacity:.85}
+  .tile.hero .v{color:var(--accent-ink)}
+  .tile.hero .v small{color:var(--accent-ink);opacity:.85}
+
+  .field{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .field label{font-size:13px;color:var(--muted);font-weight:600}
+  .input-g{position:relative;display:inline-flex;align-items:center}
+  .input-g input{width:130px;border:1px solid var(--line-strong);background:var(--surface-2);border-radius:var(--r-sm);
+    padding:10px 40px 10px 13px;font-size:16px;font-variant-numeric:tabular-nums;outline:none}
+  .input-g input:focus{border-color:var(--accent);background:var(--surface)}
+  .input-g .suffix{position:absolute;right:12px;color:var(--muted);font-size:13px;font-weight:600;pointer-events:none}
+
+  .note{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px;
+    font-size:13px;color:var(--muted);margin-top:12px}
+  .note b{color:var(--ink)}
+  .flex-between{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+
+  /* portion result */
+  .portion-out{display:flex;align-items:baseline;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .portion-out .big{font-family:var(--display);font-weight:600;font-size:34px;letter-spacing:-.01em;color:var(--accent)}
+  .portion-out .lbl{color:var(--muted);font-size:14px}
+  .disabled-hint{color:var(--muted);font-size:13.5px;font-style:italic}
+
+  .log{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .log h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px}
+  .log-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .log-item:last-child{border-bottom:none}
+  .log-item .li-g{font-weight:600}
+  .log-item .li-t{color:var(--muted);font-size:12px}
+  .log-item .li-k{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+  .log-item .li-x{border:none;background:none;color:var(--muted);font-size:15px;padding:2px 6px;border-radius:6px}
+  .log-item .li-x:hover{color:var(--accent);background:var(--accent-soft)}
+  .remain{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .remain .tile{background:var(--green-soft);border-color:transparent}
+  .remain .tile .v{color:var(--green)}
+
+  .footer-note{text-align:center;color:var(--muted);font-size:12px;margin-top:26px;line-height:1.6}
+  .footer-note a{color:var(--accent)}
+
+  /* confirm dialog */
+  dialog{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);
+    padding:20px;max-width:340px;box-shadow:var(--shadow)}
+  dialog::backdrop{background:rgba(30,20,10,.45)}
+  dialog h3{margin:0 0 6px;font-family:var(--display);font-size:18px}
+  dialog p{margin:0 0 16px;color:var(--muted);font-size:14px}
+  dialog .dlg-actions{display:flex;gap:9px;justify-content:flex-end}
+
+  /* daily goals */
+  .goals-card .goals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px 22px;margin-top:14px}
+  .goal-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+  .goal-lbl{font-size:13px;font-weight:700}
+  .goal-val{font-size:14px;font-weight:700}
+  .goal-goal{color:var(--muted);font-weight:600;font-size:12px;margin-left:2px}
+  .goal-val.over{color:var(--accent)}
+  .goal-track{height:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .goal-fill{height:100%;border-radius:999px;transition:width .35s ease}
+  .goals-edit{margin-top:16px}
+  .goals-edit summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--accent);width:max-content;list-style:none}
+  .goals-edit summary::-webkit-details-marker{display:none}
+  .goals-edit summary::before{content:"⚙ ";}
+  .goals-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:12px}
+  .goals-inputs label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted)}
+  .goals-inputs input{width:100%;min-width:0;border:1px solid var(--line-strong);background:var(--surface-2);border-radius:8px;
+    padding:8px 10px;font-size:15px;font-variant-numeric:tabular-nums;outline:none;color:inherit}
+  .goals-inputs input:focus{border-color:var(--accent);background:var(--surface)}
+
+  /* macro chips + cells */
+  .macro-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+  .mchip{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid transparent}
+  .mchip.pro{color:var(--pro);background:var(--pro-soft)}
+  .mchip.carb{color:var(--carb);background:var(--carb-soft)}
+  .mchip.fat{color:var(--fat);background:var(--fat-soft)}
+  .chip-note{font-size:12px;color:var(--muted)}
+  td.macro{font-variant-numeric:tabular-nums;font-weight:600;font-size:13px}
+  td.macro.pro{color:var(--pro)} td.macro.carb{color:var(--carb)} td.macro.fat{color:var(--fat)}
+  thead th.mh{font-size:11px}
+  .li-macros{color:var(--muted);font-size:11.5px;margin-top:2px}
+
+  @media (max-width:520px){
+    .brand h1{font-size:24px}
+    .remain{grid-template-columns:1fr}
+    .cellinput{width:58px}
+  }
+</style>
+
+<div class="wrap">
+  <header class="app">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 14c-2.2 0-4-1.9-4-4.2C3 7.6 4.5 6 6.4 6c.2-1.7 1.6-3 3.3-3 1.2 0 2.2.6 2.8 1.5C13.1 3.6 14.2 3 15.4 3c1.9 0 3.4 1.6 3.4 3.6 0 .1 0 .3 0 .4 1.3.5 2.2 1.8 2.2 3.3 0 2-1.7 3.7-3.8 3.7"/>
+          <path d="M7 14h10l-.8 6.2c-.1.9-.9 1.8-1.9 1.8H9.7c-1 0-1.8-.9-1.9-1.8L7 14Z"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Chef Calorie</h1>
+        <p>Calorie and macro tracking by recipe, <em>cooked weight</em>, and serving size</p>
+      </div>
+    </div>
+    <button class="btn ghost sm" id="themeBtn" title="Toggle light/dark">Theme</button>
+  </header>
+
+  <div class="tabsbar" id="tabsbar"></div>
+
+  <main id="panel"></main>
+
+  <p class="footer-note">
+    Nutrition values are drawn from a built-in database based on USDA FoodData Central, covering common cooking ingredients
+    with unit-to-gram conversions. Automatic matches are estimates; edit any weight or calorie value to refine them, and your
+    changes are saved.<br>
+    Data is stored on this device and remains until you delete it.
+  </p>
+</div>
+
+<dialog id="confirm">
+  <h3 id="cf-title">Delete?</h3>
+  <p id="cf-msg">This cannot be undone.</p>
+  <div class="dlg-actions">
+    <button class="btn sm" id="cf-cancel">Cancel</button>
+    <button class="btn primary sm" id="cf-ok">Delete</button>
+  </div>
+</dialog>
+
+<script>
+/* ============================================================
+   CHEF CALORIE  — calorie engine + app
+   ============================================================ */
+
+/* ---------- unit tables ---------- */
+const VOL = { // ml per unit
+  cup:236.588, cups:236.588, c:236.588,
+  tbsp:14.787, tbsps:14.787, tablespoon:14.787, tablespoons:14.787, tbs:14.787, tb:14.787,
+  tsp:4.929, tsps:4.929, teaspoon:4.929, teaspoons:4.929, ts:4.929,
+  ml:1, milliliter:1, milliliters:1, cc:1,
+  l:1000, liter:1000, liters:1000, litre:1000, litres:1000,
+  floz:29.574, "fl oz":29.574, "fluid ounce":29.574,
+  pint:473.176, pints:473.176, pt:473.176,
+  quart:946.353, quarts:946.353, qt:946.353,
+  gallon:3785.41, gallons:3785.41, gal:3785.41,
+};
+const WT = { // grams per unit
+  g:1, gr:1, gram:1, grams:1, gm:1, gms:1,
+  kg:1000, kilo:1000, kilos:1000, kilogram:1000, kilograms:1000,
+  mg:0.001,
+  oz:28.35, ounce:28.35, ounces:28.35,
+  lb:453.592, lbs:453.592, pound:453.592, pounds:453.592,
+};
+const COUNT = new Set(["clove","cloves","piece","pieces","pcs","pc","pce","whole",
+  "stalk","stalks","sprig","sprigs","head","heads","bunch","bunches","stick","sticks",
+  "fillet","fillets","can","cans","slice","slices","strip","strips","leaf","leaves",
+  "rib","ribs","ear","ears","fruit"]);
+const SMALL = {pinch:0.36,pinches:0.36,dash:0.6,dashes:0.6,drop:0.05,drops:0.05,handful:30,handfuls:30};
+const SIZE = {small:0.72,sm:0.72,little:0.72,medium:1,med:1,mid:1,large:1.38,lg:1.38,big:1.38,jumbo:1.7,extra:1.38};
+
+const UNICODE_FR = {"½":".5","⅓":".333","⅔":".667","¼":".25","¾":".75","⅕":".2","⅖":".4","⅗":".6","⅘":".8","⅙":".167","⅛":".125","⅜":".375","⅝":".625","⅞":".875"};
+
+/* prep / filler words to drop from an ingredient name before matching */
+const PREP = new Set(["chopped","minced","diced","sliced","grated","shredded","crushed",
+  "fresh","freshly","dried","whole","halved","quartered","peeled","seeded","deseeded",
+  "cored","ripe","boneless","skinless","cooked","raw","uncooked","finely","roughly",
+  "thinly","thickly","packed","softened","melted","room","temperature","taste","optional",
+  "divided","plus","more","for","grilling","serving","garnish","cubed","drained","rinsed",
+  "of","and","a","an","the","to","into","or","about","approx","approximately","large","small",
+  "medium","mexican","italian","toasted","ground","warm","cold","hot","extra","virgin","light",
+  "dark","low","sodium","reduced","fat","free","unsalted","salted","organic","canned","frozen",
+  "coarse","fine","kosher","sea","table","granulated","powdered","confectioners","packed",
+  "good","quality","best","new","old","baby","wedge","wedges","juiced"]);
+
+/* ---------- NUTRITION DATABASE ----------
+   kc  = kcal per 100 g
+   d   = density g/ml  (turns cup/tbsp/tsp/ml into grams; tuned to real cup weights)
+   ea  = grams per single item / clove / piece / slice
+   jy  = grams of juice yielded by one fruit ; jkc = kcal/100g of that juice
+   Keys[0] is the display name; extra keys are match aliases.
+------------------------------------------------------------------ */
+const DB = [
+  // Oils & fats
+  {n:["olive oil","evoo"],kc:884,p:0,c:0,f:100,d:0.913},
+  {n:["vegetable oil","canola oil","cooking oil","sunflower oil","corn oil"],kc:884,p:0,c:0,f:100,d:0.92},
+  {n:["coconut oil"],kc:862,p:0,c:0,f:100,d:0.92},
+  {n:["sesame oil"],kc:884,p:0,c:0,f:100,d:0.92},
+  {n:["butter"],kc:717,p:0.85,c:0.06,f:81,d:0.911,ea:14},
+  {n:["ghee","clarified butter"],kc:900,p:0,c:0,f:100,d:0.91},
+  {n:["margarine"],kc:717,p:0.9,c:0.9,f:81,d:0.91},
+  {n:["mayonnaise","mayo"],kc:680,p:1,c:0.6,f:75,d:0.91},
+  {n:["lard","shortening"],kc:900,p:0,c:0,f:100,d:0.92},
+
+  // Sauces & condiments
+  {n:["soy sauce","tamari","shoyu"],kc:53,p:8,c:5,f:0.6,d:1.08},
+  {n:["fish sauce"],kc:35,p:5,c:4,f:0,d:1.02},
+  {n:["oyster sauce"],kc:133,p:3,c:27,f:0.3,d:1.2},
+  {n:["hoisin sauce","hoisin"],kc:220,p:3,c:44,f:3.4,d:1.2},
+  {n:["worcestershire sauce","worcestershire"],kc:78,p:0,c:19,f:0,d:1.1},
+  {n:["ketchup","catsup","tomato ketchup"],kc:101,p:1.2,c:26,f:0.3,d:1.14},
+  {n:["mustard","dijon","dijon mustard","yellow mustard"],kc:66,p:4,c:5,f:4,d:1.0},
+  {n:["sriracha","hot sauce","chili sauce","chilli sauce"],kc:93,p:2,c:19,f:1,d:1.1},
+  {n:["barbecue sauce","bbq sauce"],kc:172,p:1,c:41,f:0.6,d:1.15},
+  {n:["tomato paste"],kc:82,p:4,c:19,f:0.5,d:1.1},
+  {n:["tomato sauce","passata","marinara"],kc:29,p:1.3,c:5,f:0.3,d:1.03},
+  {n:["adobo sauce","adobo"],kc:90,p:1.5,c:12,f:4,d:1.05},
+  {n:["chipotle in adobo","chipotle peppers in adobo","chipotle","chipotles"],kc:82,p:3,c:13,f:2.5,d:1.0,ea:18},
+  {n:["peanut butter"],kc:588,p:25,c:20,f:50,d:1.08},
+  {n:["salsa"],kc:36,p:1.5,c:7,f:0.2,d:1.03},
+  {n:["coconut milk"],kc:230,p:2.3,c:6,f:24,d:0.99},
+  {n:["coconut cream"],kc:330,p:3.6,c:6.6,f:34,d:1.0},
+
+  // Vinegars & acids
+  {n:["apple cider vinegar","cider vinegar"],kc:22,p:0,c:0.9,f:0,d:1.01},
+  {n:["balsamic vinegar","balsamic"],kc:88,p:0.5,c:17,f:0,d:1.06},
+  {n:["white vinegar","distilled vinegar","vinegar"],kc:18,p:0,c:0.04,f:0,d:1.01},
+  {n:["rice vinegar","rice wine vinegar"],kc:18,p:0,c:0.5,f:0,d:1.01},
+  {n:["red wine vinegar","white wine vinegar","wine vinegar"],kc:19,p:0,c:0.3,f:0,d:1.01},
+
+  // Sweeteners
+  {n:["sugar","white sugar","granulated sugar","caster sugar"],kc:387,p:0,c:100,f:0,d:0.845},
+  {n:["brown sugar"],kc:380,p:0,c:98,f:0,d:0.90},
+  {n:["powdered sugar","icing sugar","confectioners sugar"],kc:389,p:0,c:100,f:0,d:0.53},
+  {n:["honey"],kc:304,p:0.3,c:82,f:0,d:1.42},
+  {n:["maple syrup"],kc:260,p:0,c:67,f:0.1,d:1.37},
+  {n:["agave","agave syrup","agave nectar"],kc:310,p:0,c:76,f:0,d:1.37},
+  {n:["molasses"],kc:290,p:0,c:75,f:0.1,d:1.4},
+  {n:["corn syrup"],kc:283,p:0,c:77,f:0,d:1.38},
+
+  // Dairy & eggs
+  {n:["milk","whole milk"],kc:61,p:3.2,c:4.8,f:3.3,d:1.03},
+  {n:["skim milk","nonfat milk"],kc:34,p:3.4,c:5,f:0.1,d:1.03},
+  {n:["heavy cream","double cream","whipping cream"],kc:340,p:2.8,c:2.8,f:36,d:1.0},
+  {n:["half and half"],kc:131,p:3,c:4.3,f:11.5,d:1.01},
+  {n:["sour cream"],kc:198,p:2.4,c:4.6,f:19,d:1.0},
+  {n:["yogurt","plain yogurt","yoghurt"],kc:61,p:3.5,c:4.7,f:3.3,d:1.03},
+  {n:["greek yogurt","greek yoghurt"],kc:59,p:10,c:3.6,f:0.4,d:1.03},
+  {n:["cream cheese"],kc:342,p:6,c:4,f:34,d:1.0},
+  {n:["cheddar","cheddar cheese"],kc:403,p:25,c:1.3,f:33,d:0.45,ea:28},
+  {n:["parmesan","parmesan cheese","parmigiano"],kc:431,p:38,c:4,f:29,d:0.42},
+  {n:["mozzarella","mozzarella cheese"],kc:300,p:22,c:2.2,f:22,d:0.45,ea:28},
+  {n:["feta","feta cheese"],kc:264,p:14,c:4,f:21,d:0.6},
+  {n:["cheese"],kc:380,p:24,c:2,f:31,d:0.45,ea:28},
+  {n:["egg","eggs","large egg"],kc:143,p:13,c:0.7,f:9.5,d:1.03,ea:50},
+  {n:["egg white","egg whites"],kc:52,p:11,c:0.7,f:0.2,d:1.03,ea:33},
+  {n:["egg yolk","egg yolks"],kc:322,p:16,c:3.6,f:27,d:1.03,ea:17},
+
+  // Vegetables & aromatics
+  {n:["onion","yellow onion","white onion","red onion"],kc:40,p:1.1,c:9.3,f:0.1,d:0.68,ea:110},
+  {n:["shallot","shallots"],kc:72,p:2.5,c:17,f:0.1,d:0.68,ea:25},
+  {n:["garlic"],kc:149,p:6.4,c:33,f:0.5,d:0.60,ea:3},
+  {n:["ginger","fresh ginger"],kc:80,p:1.8,c:18,f:0.8,d:0.40,ea:30},
+  {n:["scallion","green onion","green onions","spring onion","scallions"],kc:32,p:1.8,c:7.3,f:0.2,d:0.42,ea:15},
+  {n:["leek","leeks"],kc:61,p:1.5,c:14,f:0.3,d:0.4,ea:90},
+  {n:["tomato","tomatoes","roma tomato"],kc:18,p:0.9,c:3.9,f:0.2,d:0.63,ea:123},
+  {n:["cherry tomato","cherry tomatoes","grape tomato"],kc:18,p:0.9,c:3.9,f:0.2,d:0.63,ea:17},
+  {n:["bell pepper","red bell pepper","green bell pepper","capsicum","bell peppers"],kc:31,p:1,c:6,f:0.3,d:0.63,ea:119},
+  {n:["jalapeno","jalapeno pepper","jalapenos"],kc:29,p:0.9,c:6.5,f:0.4,d:0.63,ea:14},
+  {n:["serrano","serrano pepper"],kc:32,p:1.7,c:6.7,f:0.4,d:0.63,ea:6},
+  {n:["chili pepper","chilli pepper","red chili","green chili","thai chili","bird's eye chili"],kc:40,p:1.9,c:9,f:0.4,d:0.63,ea:5},
+  {n:["poblano","anaheim pepper"],kc:20,p:0.9,c:4.6,f:0.2,d:0.63,ea:45},
+  {n:["carrot","carrots"],kc:41,p:0.9,c:10,f:0.2,d:0.55,ea:61},
+  {n:["celery"],kc:16,p:0.7,c:3,f:0.2,d:0.42,ea:40},
+  {n:["potato","potatoes","russet potato"],kc:77,p:2,c:17,f:0.1,d:0.6,ea:173},
+  {n:["sweet potato","sweet potatoes","yam"],kc:86,p:1.6,c:20,f:0.1,d:0.6,ea:130},
+  {n:["mushroom","mushrooms","button mushroom","cremini"],kc:22,p:3.1,c:3.3,f:0.3,d:0.30,ea:18},
+  {n:["spinach","baby spinach"],kc:23,p:2.9,c:3.6,f:0.4,d:0.127},
+  {n:["kale"],kc:35,p:2.9,c:4.4,f:1.5,d:0.28},
+  {n:["broccoli"],kc:34,p:2.8,c:7,f:0.4,d:0.37,ea:150},
+  {n:["cauliflower"],kc:25,p:1.9,c:5,f:0.3,d:0.4,ea:120},
+  {n:["cabbage"],kc:25,p:1.3,c:6,f:0.1,d:0.38},
+  {n:["cucumber"],kc:15,p:0.7,c:3.6,f:0.1,d:0.6,ea:200},
+  {n:["zucchini","courgette"],kc:17,p:1.2,c:3.1,f:0.3,d:0.55,ea:196},
+  {n:["eggplant","aubergine"],kc:25,p:1,c:6,f:0.2,d:0.55,ea:250},
+  {n:["corn","sweet corn","corn kernels"],kc:86,p:3.3,c:19,f:1.4,d:0.62,ea:90},
+  {n:["peas","green peas"],kc:81,p:5.4,c:14,f:0.4,d:0.62},
+  {n:["green beans"],kc:31,p:1.8,c:7,f:0.2,d:0.45},
+  {n:["lettuce","romaine","iceberg lettuce"],kc:15,p:1.4,c:2.9,f:0.2,d:0.24},
+  {n:["avocado"],kc:160,p:2,c:9,f:15,d:0.9,ea:150},
+  {n:["olives","olive","black olives","green olives"],kc:115,p:0.8,c:6,f:11,d:0.7,ea:4},
+  {n:["beans","black beans","kidney beans","pinto beans"],kc:130,p:8.9,c:24,f:0.5,d:0.72},
+  {n:["chickpeas","garbanzo beans"],kc:164,p:8.9,c:27,f:2.6,d:0.72},
+  {n:["lentils"],kc:116,p:9,c:20,f:0.4,d:0.8},
+
+  // Fruits (with juice yields)
+  {n:["lime"],kc:30,p:0.7,c:11,f:0.2,d:0.6,ea:67,jy:28,jkc:25},
+  {n:["lemon"],kc:29,p:1.1,c:9,f:0.3,d:0.6,ea:84,jy:45,jkc:22},
+  {n:["orange"],kc:47,p:0.9,c:12,f:0.1,d:0.6,ea:131,jy:80,jkc:45},
+  {n:["apple","apples"],kc:52,p:0.3,c:14,f:0.2,d:0.6,ea:182},
+  {n:["banana","bananas"],kc:89,p:1.1,c:23,f:0.3,d:0.66,ea:118},
+  {n:["pineapple"],kc:50,p:0.5,c:13,f:0.1,d:0.62,ea:900},
+  {n:["mango","mangoes"],kc:60,p:0.8,c:15,f:0.4,d:0.66,ea:200},
+  {n:["strawberry","strawberries"],kc:32,p:0.7,c:7.7,f:0.3,d:0.6,ea:12},
+  {n:["grapes"],kc:69,p:0.7,c:18,f:0.2,d:0.63,ea:5},
+  {n:["raisins"],kc:299,p:3.1,c:79,f:0.5,d:0.68},
+  {n:["coconut","shredded coconut"],kc:354,p:3.3,c:15,f:33,d:0.35},
+
+  // Herbs
+  {n:["cilantro","coriander leaves","coriander","fresh coriander"],kc:23,p:2.1,c:3.7,f:0.5,d:0.068},
+  {n:["parsley","flat leaf parsley"],kc:36,p:3,c:6,f:0.8,d:0.063},
+  {n:["basil","fresh basil"],kc:23,p:3.2,c:2.7,f:0.6,d:0.10},
+  {n:["mint","fresh mint"],kc:44,p:3.3,c:8,f:0.7,d:0.10},
+  {n:["dill"],kc:43,p:3.5,c:7,f:1.1,d:0.08},
+  {n:["rosemary","fresh rosemary"],kc:131,p:3.3,c:21,f:5.9,d:0.15},
+  {n:["thyme","fresh thyme"],kc:101,p:5.6,c:24,f:1.7,d:0.14},
+
+  // Dried spices & leaveners (density tuned to per-tsp weights)
+  {n:["chili powder","chilli powder"],kc:282,p:13,c:50,f:14,d:0.53},
+  {n:["cumin","cumin seed"],kc:375,p:18,c:44,f:22,d:0.43},
+  {n:["paprika","smoked paprika"],kc:282,p:14,c:54,f:13,d:0.47},
+  {n:["oregano","oregano leaves"],kc:265,p:9,c:69,f:4.3,d:0.20},
+  {n:["black pepper","pepper","ground pepper","white pepper","peppercorns"],kc:251,p:10,c:64,f:3.3,d:0.47},
+  {n:["cinnamon"],kc:247,p:4,c:81,f:1.2,d:0.53},
+  {n:["garlic powder"],kc:331,p:17,c:73,f:0.7,d:0.60},
+  {n:["onion powder"],kc:341,p:10,c:79,f:1,d:0.48},
+  {n:["turmeric"],kc:312,p:10,c:67,f:3.3,d:0.62},
+  {n:["curry powder"],kc:325,p:13,c:56,f:14,d:0.45},
+  {n:["cayenne","cayenne pepper"],kc:318,p:12,c:57,f:17,d:0.47},
+  {n:["red pepper flakes","chili flakes","crushed red pepper"],kc:282,p:12,c:57,f:17,d:0.42},
+  {n:["ginger powder","ground ginger"],kc:335,p:9,c:72,f:4.2,d:0.36},
+  {n:["coriander powder","ground coriander"],kc:298,p:12,c:55,f:18,d:0.42},
+  {n:["nutmeg"],kc:525,p:6,c:49,f:36,d:0.47},
+  {n:["cloves","ground cloves"],kc:274,p:6,c:66,f:13,d:0.43},
+  {n:["allspice"],kc:263,p:6,c:72,f:9,d:0.42},
+  {n:["bay leaf","bay leaves"],kc:0,p:0,c:0,f:0,d:0.05,ea:0.2},
+  {n:["salt","kosher salt","sea salt","table salt"],kc:0,p:0,c:0,f:0,d:1.2},
+  {n:["msg","monosodium glutamate"],kc:0,p:0,c:0,f:0,d:1.0},
+  {n:["baking soda"],kc:0,p:0,c:0,f:0,d:0.92},
+  {n:["baking powder"],kc:53,p:0,c:28,f:0,d:0.9},
+  {n:["vanilla","vanilla extract"],kc:288,p:0.1,c:13,f:0.1,d:0.88},
+
+  // Proteins
+  {n:["chicken breast","chicken breasts"],kc:165,p:31,c:0,f:3.6,d:1.0,ea:174},
+  {n:["chicken thigh","chicken thighs"],kc:209,p:26,c:0,f:11,d:1.0,ea:110},
+  {n:["chicken","chicken meat"],kc:190,p:29,c:0,f:7.5,d:1.0},
+  {n:["ground beef","minced beef","beef mince","hamburger"],kc:250,p:26,c:0,f:15,d:1.0},
+  {n:["beef","steak","beef steak","sirloin"],kc:271,p:25,c:0,f:19,d:1.0},
+  {n:["pork","pork chop","pork loin"],kc:242,p:27,c:0,f:14,d:1.0},
+  {n:["ground pork","pork mince"],kc:263,p:17,c:0,f:21,d:1.0},
+  {n:["bacon"],kc:541,p:37,c:1.4,f:42,d:1.0,ea:12},
+  {n:["sausage"],kc:301,p:18,c:1,f:25,d:1.0,ea:75},
+  {n:["ham"],kc:145,p:21,c:1.5,f:5.5,d:1.0,ea:28},
+  {n:["salmon","salmon fillet"],kc:208,p:20,c:0,f:13,d:1.0,ea:170},
+  {n:["tuna"],kc:132,p:28,c:0,f:1.3,d:1.0},
+  {n:["shrimp","prawns","prawn"],kc:99,p:24,c:0.2,f:0.3,d:1.0,ea:15},
+  {n:["fish","white fish","cod","tilapia"],kc:96,p:20,c:0,f:1.5,d:1.0,ea:150},
+  {n:["tofu"],kc:76,p:8,c:1.9,f:4.8,d:1.03,ea:120},
+
+  // Grains, starch, bread
+  {n:["rice","white rice","uncooked rice","jasmine rice","basmati rice"],kc:365,p:7,c:80,f:0.7,d:0.80},
+  {n:["cooked rice"],kc:130,p:2.7,c:28,f:0.3,d:0.72},
+  {n:["brown rice"],kc:370,p:7.9,c:77,f:2.9,d:0.78},
+  {n:["pasta","spaghetti","macaroni","penne","dry pasta"],kc:371,p:13,c:75,f:1.5,d:0.42},
+  {n:["cooked pasta"],kc:131,p:5,c:25,f:1.1,d:0.5},
+  {n:["flour","all purpose flour","plain flour","wheat flour"],kc:364,p:10,c:76,f:1,d:0.53},
+  {n:["bread","white bread","toast"],kc:265,p:9,c:49,f:3.2,d:0.3,ea:28},
+  {n:["breadcrumbs","panko"],kc:395,p:13,c:72,f:5,d:0.46},
+  {n:["oats","rolled oats","oatmeal"],kc:389,p:17,c:66,f:7,d:0.40},
+  {n:["quinoa"],kc:368,p:14,c:64,f:6,d:0.72},
+  {n:["cornstarch","corn starch","cornflour"],kc:381,p:0.3,c:91,f:0.1,d:0.51},
+  {n:["cornmeal","polenta"],kc:370,p:8,c:79,f:3.6,d:0.6},
+  {n:["tortilla","tortillas","flour tortilla"],kc:310,p:8,c:50,f:8,d:0.3,ea:45},
+
+  // Nuts & seeds
+  {n:["almonds","almond"],kc:579,p:21,c:22,f:50,d:0.6,ea:1.2},
+  {n:["walnuts","walnut"],kc:654,p:15,c:14,f:65,d:0.5},
+  {n:["cashews","cashew"],kc:553,p:18,c:30,f:44,d:0.6},
+  {n:["peanuts","peanut"],kc:567,p:26,c:16,f:49,d:0.6},
+  {n:["pecans","pecan"],kc:691,p:9,c:14,f:72,d:0.5},
+  {n:["sesame seeds","sesame seed"],kc:573,p:18,c:23,f:50,d:0.6},
+  {n:["sunflower seeds"],kc:584,p:21,c:20,f:51,d:0.5},
+  {n:["chia seeds","chia"],kc:486,p:17,c:42,f:31,d:0.7},
+  {n:["pine nuts"],kc:673,p:14,c:13,f:68,d:0.57},
+
+  // Liquids & misc
+  {n:["water"],kc:0,p:0,c:0,f:0,d:1.0},
+  {n:["chicken broth","chicken stock","vegetable broth","beef broth","stock","broth","bouillon"],kc:6,p:0.9,c:0.4,f:0.2,d:1.0},
+  {n:["wine","red wine","white wine","cooking wine"],kc:83,p:0.1,c:2.6,f:0,d:0.99},
+  {n:["beer"],kc:43,p:0.5,c:3.6,f:0,d:1.0},
+  {n:["cocoa powder","cacao powder"],kc:228,p:20,c:58,f:14,d:0.51},
+  {n:["chocolate chips","chocolate"],kc:480,p:4.2,c:64,f:24,d:0.72},
+  {n:["orange juice"],kc:45,p:0.7,c:10,f:0.2,d:1.04},
+  {n:["cranberry juice","apple juice"],kc:46,p:0.1,c:11,f:0.1,d:1.04},
+
+  // ---- Expanded set ----
+  // Milks, creams & alt-milks
+  {n:["almond milk"],kc:15,p:0.6,c:0.6,f:1.2,d:1.03},
+  {n:["oat milk"],kc:45,p:1,c:7,f:1.5,d:1.03},
+  {n:["soy milk"],kc:54,p:3.3,c:6,f:1.8,d:1.03},
+  {n:["condensed milk","sweetened condensed milk"],kc:321,p:8,c:54,f:9,d:1.29},
+  {n:["evaporated milk"],kc:134,p:7,c:10,f:7.6,d:1.07},
+  {n:["buttermilk"],kc:40,p:3.3,c:4.8,f:0.9,d:1.03},
+  {n:["powdered milk","milk powder"],kc:496,p:26,c:38,f:27,d:0.4},
+  {n:["coconut water"],kc:19,p:0.7,c:3.7,f:0.2,d:1.0},
+
+  // More cheeses
+  {n:["ricotta","ricotta cheese"],kc:174,p:11,c:3,f:13,d:1.0},
+  {n:["cottage cheese"],kc:98,p:11,c:3.4,f:4.3,d:1.0},
+  {n:["swiss cheese"],kc:393,p:27,c:1.4,f:31,d:0.45,ea:28},
+  {n:["gouda","gouda cheese"],kc:356,p:25,c:2.2,f:27,d:0.45,ea:28},
+  {n:["blue cheese"],kc:353,p:21,c:2.3,f:29,d:0.45},
+  {n:["goat cheese"],kc:364,p:22,c:2.5,f:30,d:0.5},
+  {n:["provolone"],kc:351,p:26,c:2.1,f:27,d:0.45,ea:28},
+  {n:["gruyere"],kc:413,p:30,c:0.4,f:33,d:0.45},
+  {n:["cream cheese"],kc:342,p:6,c:4,f:34,d:1.0},
+
+  // More proteins & cured meats
+  {n:["turkey","turkey breast"],kc:189,p:29,c:0,f:7,d:1.0},
+  {n:["ground turkey"],kc:203,p:27,c:0,f:10,d:1.0},
+  {n:["ground chicken"],kc:143,p:17,c:0,f:8,d:1.0},
+  {n:["duck","duck breast"],kc:337,p:19,c:0,f:28,d:1.0},
+  {n:["lamb","lamb chop"],kc:294,p:25,c:0,f:21,d:1.0},
+  {n:["pork belly"],kc:518,p:9,c:0,f:53,d:1.0},
+  {n:["prosciutto"],kc:290,p:23,c:1,f:21,d:1.0,ea:15},
+  {n:["salami"],kc:336,p:22,c:2,f:26,d:1.0,ea:5},
+  {n:["pepperoni"],kc:504,p:19,c:1.4,f:46,d:1.0,ea:1},
+  {n:["hot dog","frankfurter"],kc:290,p:10,c:4,f:26,d:1.0,ea:45},
+  {n:["tempeh"],kc:192,p:20,c:8,f:11,d:1.0},
+  {n:["seitan"],kc:370,p:75,c:14,f:2,d:1.0},
+  {n:["edamame"],kc:121,p:12,c:9,f:5,d:0.7},
+  {n:["hummus"],kc:166,p:8,c:14,f:10,d:1.0},
+  {n:["refried beans"],kc:90,p:5,c:15,f:1.5,d:1.0},
+  {n:["black eyed peas"],kc:116,p:8,c:21,f:0.5,d:0.72},
+
+  // Seafood
+  {n:["crab","crab meat"],kc:97,p:19,c:0,f:1.5,d:1.0},
+  {n:["lobster"],kc:89,p:19,c:0,f:0.9,d:1.0},
+  {n:["scallops","scallop"],kc:69,p:12,c:3,f:0.5,d:1.0,ea:15},
+  {n:["mussels"],kc:86,p:12,c:3.7,f:2.2,d:1.0},
+  {n:["clams"],kc:86,p:15,c:3,f:1,d:1.0},
+  {n:["oysters","oyster"],kc:81,p:9,c:4,f:2.9,d:1.0,ea:15},
+  {n:["squid","calamari"],kc:92,p:16,c:3,f:1.4,d:1.0},
+  {n:["anchovy","anchovies"],kc:210,p:29,c:0,f:10,d:1.0,ea:4},
+  {n:["sardines"],kc:208,p:25,c:0,f:11,d:1.0},
+  {n:["mackerel"],kc:205,p:19,c:0,f:14,d:1.0},
+  {n:["halibut"],kc:111,p:23,c:0,f:2.3,d:1.0},
+  {n:["trout"],kc:148,p:21,c:0,f:7,d:1.0},
+  {n:["catfish"],kc:95,p:16,c:0,f:2.8,d:1.0},
+
+  // More vegetables
+  {n:["asparagus"],kc:20,p:2.2,c:3.9,f:0.1,d:0.6,ea:16},
+  {n:["brussels sprouts"],kc:43,p:3.4,c:9,f:0.3,d:0.5,ea:19},
+  {n:["beet","beetroot","beets"],kc:43,p:1.6,c:10,f:0.2,d:0.6,ea:82},
+  {n:["radish","radishes"],kc:16,p:0.7,c:3.4,f:0.1,d:0.5,ea:5},
+  {n:["turnip"],kc:28,p:0.9,c:6,f:0.1,d:0.6,ea:120},
+  {n:["pumpkin"],kc:26,p:1,c:7,f:0.1,d:0.5},
+  {n:["pumpkin puree"],kc:34,p:1.1,c:8,f:0.3,d:1.0},
+  {n:["butternut squash","squash"],kc:45,p:1,c:12,f:0.1,d:0.55},
+  {n:["okra"],kc:33,p:1.9,c:7,f:0.2,d:0.5},
+  {n:["artichoke"],kc:47,p:3.3,c:11,f:0.2,d:0.5,ea:128},
+  {n:["fennel"],kc:31,p:1.2,c:7,f:0.2,d:0.5,ea:234},
+  {n:["bok choy","pak choi"],kc:13,p:1.5,c:2.2,f:0.2,d:0.4},
+  {n:["swiss chard","chard"],kc:19,p:1.8,c:3.7,f:0.2,d:0.3},
+  {n:["arugula","rocket"],kc:25,p:2.6,c:3.7,f:0.7,d:0.2},
+  {n:["snap peas","snow peas"],kc:42,p:2.8,c:7.5,f:0.2,d:0.5},
+  {n:["bean sprouts","beansprouts"],kc:30,p:3,c:6,f:0.2,d:0.4},
+  {n:["water chestnut","water chestnuts"],kc:97,p:1.4,c:24,f:0.1,d:0.6},
+  {n:["bamboo shoots"],kc:27,p:2.6,c:5.2,f:0.3,d:0.6},
+  {n:["sun dried tomato","sun-dried tomato","sundried tomato"],kc:258,p:14,c:56,f:3,d:0.4},
+  {n:["diced tomatoes","canned tomatoes","crushed tomatoes"],kc:32,p:1.6,c:7,f:0.3,d:1.02},
+  {n:["plantain","plantains"],kc:122,p:1.3,c:32,f:0.4,d:0.6,ea:180},
+  {n:["guacamole"],kc:157,p:2,c:9,f:14,d:1.0},
+
+  // More fruits
+  {n:["blueberry","blueberries"],kc:57,p:0.7,c:14,f:0.3,d:0.7},
+  {n:["raspberry","raspberries"],kc:52,p:1.2,c:12,f:0.7,d:0.5},
+  {n:["blackberry","blackberries"],kc:43,p:1.4,c:10,f:0.5,d:0.5},
+  {n:["watermelon"],kc:30,p:0.6,c:8,f:0.2,d:0.6},
+  {n:["cantaloupe","melon"],kc:34,p:0.8,c:8,f:0.2,d:0.6},
+  {n:["peach","peaches"],kc:39,p:0.9,c:10,f:0.3,d:0.6,ea:150},
+  {n:["pear","pears"],kc:57,p:0.4,c:15,f:0.1,d:0.6,ea:178},
+  {n:["plum","plums"],kc:46,p:0.7,c:11,f:0.3,d:0.6,ea:66},
+  {n:["cherry","cherries"],kc:50,p:1,c:12,f:0.3,d:0.6,ea:8},
+  {n:["kiwi"],kc:61,p:1.1,c:15,f:0.5,d:0.6,ea:69},
+  {n:["grapefruit"],kc:42,p:0.8,c:11,f:0.1,d:0.6,ea:230},
+  {n:["apricot","apricots"],kc:48,p:1.4,c:11,f:0.4,d:0.6,ea:35},
+  {n:["fig","figs"],kc:74,p:0.8,c:19,f:0.3,d:0.6,ea:50},
+  {n:["date","dates"],kc:282,p:2.5,c:75,f:0.4,d:0.7,ea:7},
+  {n:["pomegranate"],kc:83,p:1.7,c:19,f:1.2,d:0.6},
+  {n:["dried cranberries","craisins"],kc:308,p:0.1,c:82,f:1.4,d:0.6},
+  {n:["prunes","dried plums"],kc:240,p:2.2,c:64,f:0.4,d:0.6},
+
+  // More grains, breads, noodles
+  {n:["couscous"],kc:112,p:3.8,c:23,f:0.2,d:0.7},
+  {n:["barley"],kc:352,p:10,c:78,f:1.2,d:0.7},
+  {n:["bulgur"],kc:342,p:12,c:76,f:1.3,d:0.6},
+  {n:["farro"],kc:340,p:14,c:72,f:2.5,d:0.7},
+  {n:["egg noodles","noodles"],kc:384,p:14,c:71,f:4.4,d:0.4},
+  {n:["ramen noodles","ramen"],kc:436,p:10,c:63,f:16,d:0.4,ea:85},
+  {n:["rice noodles"],kc:364,p:6,c:83,f:0.6,d:0.4},
+  {n:["soba noodles","soba"],kc:336,p:14,c:75,f:0.7,d:0.4},
+  {n:["bagel"],kc:250,p:10,c:48,f:1.5,d:0.3,ea:98},
+  {n:["pita","pita bread"],kc:275,p:9,c:55,f:1.2,d:0.3,ea:60},
+  {n:["naan"],kc:310,p:9,c:50,f:9,d:0.3,ea:90},
+  {n:["croissant"],kc:406,p:8,c:46,f:21,d:0.3,ea:57},
+  {n:["crackers","cracker"],kc:502,p:7,c:62,f:25,d:0.4,ea:3},
+  {n:["granola"],kc:471,p:10,c:64,f:20,d:0.45},
+  {n:["popcorn"],kc:387,p:13,c:78,f:4,d:0.05},
+  {n:["cereal","cornflakes"],kc:357,p:7,c:84,f:0.4,d:0.3},
+  {n:["corn tortilla"],kc:218,p:5.7,c:45,f:2.9,d:0.3,ea:26},
+  {n:["taco shell","taco shells"],kc:468,p:7,c:62,f:21,d:0.3,ea:12},
+  {n:["gnocchi"],kc:140,p:3.5,c:28,f:0.5,d:0.6},
+  {n:["whole wheat flour","wholemeal flour"],kc:340,p:13,c:72,f:2.5,d:0.53},
+  {n:["almond flour","almond meal"],kc:571,p:21,c:20,f:50,d:0.4},
+  {n:["coconut flour"],kc:400,p:18,c:60,f:13,d:0.5},
+
+  // More nuts, seeds & spreads
+  {n:["pistachios","pistachio"],kc:562,p:20,c:28,f:45,d:0.6},
+  {n:["macadamia","macadamia nuts"],kc:718,p:8,c:14,f:76,d:0.5},
+  {n:["hazelnuts","hazelnut"],kc:628,p:15,c:17,f:61,d:0.5},
+  {n:["pumpkin seeds","pepitas"],kc:559,p:30,c:11,f:49,d:0.5},
+  {n:["flaxseed","flax seeds","flaxseeds"],kc:534,p:18,c:29,f:42,d:0.6},
+  {n:["hemp seeds","hemp hearts"],kc:553,p:32,c:9,f:49,d:0.5},
+  {n:["almond butter"],kc:614,p:21,c:19,f:56,d:1.0},
+  {n:["tahini"],kc:595,p:17,c:21,f:54,d:1.0},
+  {n:["nutella","hazelnut spread"],kc:539,p:6,c:58,f:31,d:1.2},
+
+  // Sauces, pastes & dressings
+  {n:["pesto"],kc:450,p:5,c:6,f:45,d:1.0},
+  {n:["teriyaki sauce","teriyaki"],kc:89,p:5.6,c:16,f:0,d:1.15},
+  {n:["gochujang"],kc:214,p:5,c:46,f:1.5,d:1.2},
+  {n:["miso","miso paste"],kc:199,p:12,c:26,f:6,d:1.2},
+  {n:["curry paste"],kc:120,p:3,c:14,f:6,d:1.1},
+  {n:["ranch dressing","ranch"],kc:430,p:1,c:6,f:45,d:1.0},
+  {n:["caesar dressing"],kc:542,p:2,c:4,f:57,d:1.0},
+  {n:["italian dressing"],kc:240,p:0.5,c:9,f:23,d:1.0},
+  {n:["vinaigrette","salad dressing"],kc:300,p:0.5,c:8,f:30,d:1.0},
+  {n:["sweet chili sauce"],kc:226,p:0.3,c:55,f:0.3,d:1.2},
+  {n:["chili garlic sauce","sambal"],kc:50,p:1,c:11,f:0.5,d:1.1},
+  {n:["enchilada sauce"],kc:38,p:1,c:6,f:1.3,d:1.0},
+  {n:["salsa verde","green salsa"],kc:36,p:1,c:7,f:0.3,d:1.0},
+  {n:["horseradish"],kc:48,p:1.2,c:11,f:0.7,d:1.0},
+  {n:["capers"],kc:23,p:2.4,c:5,f:0.9,d:1.0,ea:1},
+  {n:["pickle","pickles","dill pickle"],kc:11,p:0.3,c:2.3,f:0.2,d:0.9,ea:35},
+  {n:["jam","jelly","fruit preserves"],kc:250,p:0.4,c:65,f:0.1,d:1.3},
+  {n:["applesauce","apple sauce"],kc:42,p:0.2,c:11,f:0.1,d:1.0},
+  {n:["gravy"],kc:54,p:2,c:6,f:2.5,d:1.0},
+  {n:["nutritional yeast"],kc:325,p:50,c:36,f:5,d:0.2},
+  {n:["tomato soup","cream of mushroom soup","condensed soup"],kc:70,p:1.5,c:9,f:3,d:1.0},
+
+  // Baking & sweets
+  {n:["dark chocolate"],kc:598,p:7.8,c:46,f:43,d:0.7},
+  {n:["milk chocolate"],kc:535,p:7.6,c:59,f:30,d:0.7},
+  {n:["white chocolate"],kc:539,p:6,c:59,f:32,d:0.7},
+  {n:["marshmallow","marshmallows"],kc:318,p:1.8,c:81,f:0.2,d:0.3},
+  {n:["gelatin"],kc:335,p:86,c:0,f:0,d:0.5},
+  {n:["yeast","active dry yeast"],kc:325,p:40,c:41,f:7,d:0.5},
+  {n:["graham crackers","graham cracker"],kc:424,p:6,c:77,f:10,d:0.4},
+  {n:["cream of tartar"],kc:258,p:0,c:62,f:0,d:0.5},
+
+  // Beverages & alcohol
+  {n:["coffee","brewed coffee"],kc:1,p:0.1,c:0,f:0,d:1.0},
+  {n:["espresso"],kc:9,p:0.1,c:1.7,f:0.2,d:1.0},
+  {n:["tea","brewed tea"],kc:1,p:0,c:0.3,f:0,d:1.0},
+  {n:["cola","soda","soft drink"],kc:42,p:0,c:11,f:0,d:1.04},
+  {n:["lemonade"],kc:40,p:0.1,c:10,f:0,d:1.04},
+  {n:["vodka","gin","spirits"],kc:231,p:0,c:0,f:0,d:0.95},
+  {n:["rum"],kc:231,p:0,c:0,f:0,d:0.95},
+  {n:["whiskey","bourbon"],kc:250,p:0,c:0,f:0,d:0.95},
+  {n:["sake"],kc:134,p:0.5,c:5,f:0,d:0.99},
+  {n:["mirin"],kc:258,p:0.2,c:43,f:0,d:1.1},
+];
+
+/* build a lookup sorted by longest alias first for greedy matching */
+const ALIASES = [];
+DB.forEach((e,i)=>e.n.forEach(name=>ALIASES.push({name,idx:i,len:name.length})));
+ALIASES.sort((a,b)=>b.len-a.len);
+
+/* ---------- helpers ---------- */
+const uid = ()=>Math.random().toString(36).slice(2,9);
+const round = (x,dp=0)=>{const m=10**dp;return Math.round((x+Number.EPSILON)*m)/m;};
+const fmt = (x)=>x>=100?Math.round(x).toLocaleString():round(x,1).toLocaleString();
+
+function parseQty(str){
+  // replace unicode fractions with decimals (handle "1½")
+  let s=str;
+  for(const [g,v] of Object.entries(UNICODE_FR)) s=s.replaceAll(g, (s.match(new RegExp("\\d"+g))?".":"")+v);
+  // patterns: "1 1/2", "1/2", "1.5", "2", "1-2" (take first)
+  let m=s.match(/^\s*(\d+)\s+(\d+)\s*\/\s*(\d+)/); // mixed
+  if(m) return {val:+m[1]+ (+m[2]/+m[3]), rest:s.slice(m[0].length)};
+  m=s.match(/^\s*(\d+)\s*\/\s*(\d+)/); // fraction
+  if(m) return {val:+m[1]/+m[2], rest:s.slice(m[0].length)};
+  m=s.match(/^\s*(\d*\.?\d+)\s*(?:-|to|–)\s*(\d*\.?\d+)/); // range -> first
+  if(m) return {val:+m[1], rest:s.slice(m[0].length)};
+  m=s.match(/^\s*(\d*\.?\d+)/); // plain
+  if(m) return {val:+m[1], rest:s.slice(m[0].length)};
+  return {val:null, rest:s};
+}
+
+function findIngredient(nameWords){
+  const hay = " "+nameWords.join(" ")+" ";
+  for(const a of ALIASES){
+    if(hay.includes(" "+a.name+" ")) return DB[a.idx];
+  }
+  // looser: any alias word-boundary substring
+  for(const a of ALIASES){
+    if(hay.includes(a.name)) return DB[a.idx];
+  }
+  return null;
+}
+/* prefer a juicing fruit (has a juice yield) e.g. "1 lime juice" = juice of one lime */
+function findJuiceFruit(nameWords){
+  const hay = " "+nameWords.join(" ")+" ";
+  for(const a of ALIASES){
+    if(DB[a.idx].jy!=null && hay.includes(" "+a.name+" ")) return DB[a.idx];
+  }
+  return null;
+}
+
+/* parse one recipe line -> row object */
+function parseLine(raw){
+  const original = raw.trim();
+  if(!original) return null;
+  let work = original.toLowerCase()
+    .replace(/ñ/g,"n")
+    .replace(/\([^)]*\)/g," ")     // drop parentheticals
+    .replace(/[.,;:]/g," ")
+    .replace(/\s+/g," ").trim();
+
+  const {val:qty, rest} = parseQty(work);
+  let tokens = rest.split(" ").filter(Boolean);
+
+  let size=null, unit=null, isJuice=false;
+
+  // pull leading size / unit tokens (also check 2-word "fl oz")
+  let i=0;
+  while(i<tokens.length){
+    const t=tokens[i];
+    if(SIZE[t]!=null && size==null){ size=t; i++; continue; }
+    if(!unit){
+      if(t==="fl" && tokens[i+1]==="oz"){ unit="floz"; i+=2; continue; }
+      if(VOL[t]!=null){ unit=t; i++; continue; }
+      if(WT[t]!=null){ unit=t; i++; continue; }
+      if(COUNT.has(t)){ unit=t; i++; continue; }
+      if(SMALL[t]!=null){ unit=t; i++; continue; }
+    }
+    break;
+  }
+  let nameTokens = tokens.slice(i);
+  if(nameTokens.some(t=>t==="juice")) isJuice=true;
+
+  // "1 small orange juice" (no volume unit) = juice of the fruit; "200 ml orange juice" = the drink
+  let ing = null;
+  if(isJuice && (!unit || COUNT.has(unit))){
+    ing = findJuiceFruit(nameTokens.filter(w=>w!=="juice"));
+  }
+  if(!ing) ing = findIngredient(nameTokens);
+
+  // clean name for display
+  let cleanWords = nameTokens.filter(w=>!PREP.has(w));
+  let display = cleanWords.join(" ").trim() || nameTokens.join(" ").trim() || original;
+  display = display.replace(/\b\w/g,c=>c.toUpperCase());
+
+  // amount label
+  let amtLabel="";
+  if(qty!=null){
+    const qn = Number.isInteger(qty)?qty:round(qty,3);
+    amtLabel = qn + (unit? " "+unit : (size? " "+size : ""));
+  }
+
+  // compute grams
+  let grams=null, kc100=null, p100=null, c100=null, f100=null, matched=false;
+  const sizeMult = size? SIZE[size] : 1;
+  const q = qty==null?1:qty;
+
+  if(ing){
+    matched=true;
+    if(isJuice && ing.jkc!=null){ kc100=ing.jkc; p100=0.5; c100=round(ing.jkc/4,1); f100=0.1; }
+    else { kc100=ing.kc; p100=ing.p; c100=ing.c; f100=ing.f; }
+    if(isJuice && ing.jy!=null && !unit){
+      grams = q * ing.jy * sizeMult;
+    } else if(unit && WT[unit]!=null){
+      grams = q * WT[unit];
+    } else if(unit==="floz"||(unit && VOL[unit]!=null)){
+      const ml = q * (unit==="floz"?29.574:VOL[unit]);
+      grams = ml * (ing.d||1);
+    } else if(unit && COUNT.has(unit)){
+      const per = ing.ea!=null ? ing.ea : (ing.d? VOL.tbsp*ing.d : null);
+      grams = per!=null ? q*per*sizeMult : null;
+    } else if(unit && SMALL[unit]!=null){
+      grams = q * SMALL[unit];
+    } else if(!unit){
+      // bare count of an item, or juice
+      if(isJuice && ing.jy!=null) grams = q*ing.jy*sizeMult;
+      else if(ing.ea!=null) grams = q*ing.ea*sizeMult;
+      else grams = null;
+    }
+  } else {
+    // unmatched but still convert weight units to grams so user only supplies kcal
+    if(unit && WT[unit]!=null) grams = q*WT[unit];
+  }
+
+  let kcal = (grams!=null && kc100!=null) ? grams*kc100/100 : 0;
+
+  return {
+    id:uid(),
+    name: display,
+    amt: amtLabel,
+    grams: grams!=null? round(grams,1) : null,
+    kc100, p100, c100, f100,
+    kcal: round(kcal,1),
+    matched,
+    manual:false
+  };
+}
+
+/* ---------- state / storage ---------- */
+const KEY="chefcalorie.v1";
+let state = load();
+
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw){ const p=JSON.parse(raw); if(p && p.tabs && p.tabs.length) return migrate(p); }
+  }catch(e){}
+  return seed();
+}
+function migrate(s){
+  if(!s.goals) s.goals={cal:2000,p:150,c:200,f:65};
+  (s.tabs||[]).forEach(t=>{
+    if(!t.eaten) t.eaten=[];
+    t.eaten.forEach(e=>{ if(e.p==null)e.p=0; if(e.c==null)e.c=0; if(e.f==null)e.f=0; });
+    (t.rows||[]).forEach(r=>{
+      if(r.p100===undefined){
+        const ing=findIngredient(String(r.name||"").toLowerCase().replace(/ñ/g,"n").split(/\s+/));
+        if(ing){ r.p100=ing.p; r.c100=ing.c; r.f100=ing.f; if(r.kc100==null && !r.manual) r.kc100=ing.kc; }
+        else { r.p100=null; r.c100=null; r.f100=null; }
+      }
+    });
+  });
+  return s;
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+}
+function seed(){
+  const sample = `1/2 cup chopped cilantro
+1/3 cup olive oil, plus more for grilling
+1/4 cup soy sauce
+1 small orange juice
+1 medium lime juice
+2 tbsp apple cider vinegar
+4 cloves garlic, minced
+1 jalapeno pepper
+2 tsp chili powder
+1 tsp ground cumin
+1 tsp dried Mexican oregano
+1 tbsp MSG
+1 tsp kosher salt
+1/4 tsp ground pepper
+2 pcs chipotle in adobo peppers`;
+  const rows = sample.split("\n").map(parseLine).filter(Boolean);
+  const t = {id:uid(), name:"Chipotle Marinade", raw:sample, rows, cooked:null, eaten:[]};
+  return {activeTabId:t.id, tabs:[t], goals:{cal:2000,p:150,c:200,f:65}};
+}
+
+const activeTab = ()=>state.tabs.find(t=>t.id===state.activeTabId)||state.tabs[0];
+const tabKcal = t=>t.rows.reduce((s,r)=>s+(+r.kcal||0),0);
+const tabGrams = t=>t.rows.reduce((s,r)=>s+(+r.grams||0),0);
+const rowMacros = r=>({
+  p:(r.grams!=null && r.p100!=null)? r.grams*r.p100/100 : 0,
+  c:(r.grams!=null && r.c100!=null)? r.grams*r.c100/100 : 0,
+  f:(r.grams!=null && r.f100!=null)? r.grams*r.f100/100 : 0,
+});
+const tabMacros = t=>t.rows.reduce((s,r)=>{const m=rowMacros(r);s.p+=m.p;s.c+=m.c;s.f+=m.f;return s;},{p:0,c:0,f:0});
+
+function todayTotals(){
+  const d=new Date(); d.setHours(0,0,0,0); const start=d.getTime();
+  const acc={cal:0,p:0,c:0,f:0,n:0};
+  state.tabs.forEach(t=>(t.eaten||[]).forEach(e=>{
+    if(e.ts && e.ts>=start){ acc.cal+=+e.kcal||0; acc.p+=+e.p||0; acc.c+=+e.c||0; acc.f+=+e.f||0; acc.n++; }
+  }));
+  return acc;
+}
+
+function goalBar(label,val,goal,color,unit){
+  const pct = goal>0? Math.min(100,val/goal*100):0;
+  const over = goal>0 && val>goal+0.5;
+  return `<div class="goal">
+    <div class="goal-top">
+      <span class="goal-lbl">${label}</span>
+      <span class="goal-val num ${over?'over':''}">${fmt(val)}<span class="goal-goal">/ ${fmt(goal)} ${unit}</span></span>
+    </div>
+    <div class="goal-track"><div class="goal-fill" style="width:${pct}%;background:${color}"></div></div>
+  </div>`;
+}
+const mchip=(l,v,cls)=>`<span class="mchip ${cls}">${l} ${fmt(v)}g</span>`;
+
+/* ---------- rendering ---------- */
+const tabsbar=document.getElementById("tabsbar");
+const panel=document.getElementById("panel");
+
+function renderTabs(){
+  tabsbar.innerHTML="";
+  state.tabs.forEach(t=>{
+    const el=document.createElement("div");
+    el.className="tab"+(t.id===state.activeTabId?" active":"");
+    const nameInput=document.createElement("input");
+    nameInput.className="name"; nameInput.value=t.name; nameInput.title="Click to rename";
+    nameInput.addEventListener("click",e=>{ if(t.id!==state.activeTabId){e.preventDefault(); state.activeTabId=t.id; save(); render();}});
+    nameInput.addEventListener("change",()=>{ t.name=nameInput.value.trim()||"Untitled"; save(); renderTabs();});
+    nameInput.addEventListener("keydown",e=>{if(e.key==="Enter")nameInput.blur();});
+    const kc=document.createElement("span"); kc.className="kc num"; kc.textContent=fmt(tabKcal(t))+" kcal";
+    const x=document.createElement("button"); x.className="x"; x.textContent="×"; x.title="Delete tab";
+    x.addEventListener("click",e=>{e.stopPropagation(); deleteTab(t);});
+    el.append(nameInput,kc,x);
+    el.addEventListener("click",()=>{ if(t.id!==state.activeTabId){state.activeTabId=t.id; save(); render();}});
+    tabsbar.appendChild(el);
+  });
+  const add=document.createElement("button");
+  add.className="tab-add"; add.textContent="+ New recipe";
+  add.addEventListener("click",()=>{
+    const t={id:uid(),name:"New recipe",raw:"",rows:[],cooked:null,eaten:[]};
+    state.tabs.push(t); state.activeTabId=t.id; save(); render();
+  });
+  tabsbar.appendChild(add);
+}
+
+function render(){
+  renderTabs();
+  const t=activeTab();
+  const total=tabKcal(t), raw=tabGrams(t);
+  const M=tabMacros(t);
+  const hasRows=t.rows.length>0;
+  const density = (t.cooked && t.cooked>0) ? total/t.cooked : null;
+  const g=state.goals, tt=todayTotals();
+
+  panel.innerHTML=`
+  <section class="card goals-card">
+    <div class="flex-between">
+      <div><p class="eyebrow">Today</p><h2>Daily goals</h2></div>
+      <span class="sub" style="margin:0">All recipes &middot; ${tt.n} portion${tt.n===1?'':'s'} logged today</span>
+    </div>
+    <div class="goals-grid">
+      ${goalBar('Calories',tt.cal,g.cal,'var(--accent)','kcal')}
+      ${goalBar('Protein',tt.p,g.p,'var(--pro)','g')}
+      ${goalBar('Carbs',tt.c,g.c,'var(--carb)','g')}
+      ${goalBar('Fat',tt.f,g.f,'var(--fat)','g')}
+    </div>
+    <details class="goals-edit">
+      <summary>Edit goals</summary>
+      <div class="goals-inputs">
+        <label>Calories<input type="number" id="goalCal" min="0" value="${g.cal}"></label>
+        <label>Protein<input type="number" id="goalP" min="0" value="${g.p}"></label>
+        <label>Carbs<input type="number" id="goalC" min="0" value="${g.c}"></label>
+        <label>Fat<input type="number" id="goalF" min="0" value="${g.f}"></label>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <p class="eyebrow">Step 1 &middot; Recipe</p>
+    <h2>Enter your recipe</h2>
+    <p class="sub">List one ingredient per line, including its amount (for example, <em>1/2 cup chopped cilantro</em>). Select Analyze to calculate calories and macros.</p>
+    <textarea id="recipeText" placeholder="1 tbsp olive oil&#10;2 cloves garlic, minced&#10;200 g chicken breast&#10;1 medium onion, diced">${escapeHtml(t.raw)}</textarea>
+    <div class="row-actions">
+      <button class="btn primary" id="analyzeBtn">Analyze recipe</button>
+      <button class="btn" id="addRowBtn">+ Add ingredient</button>
+      ${hasRows?'<button class="btn ghost" id="clearRowsBtn">Clear ingredients</button>':''}
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="flex-between">
+      <div>
+        <p class="eyebrow">Step 2 &middot; Nutrition</p>
+        <h2>Ingredients</h2>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Ingredient</th><th class="r">Weight</th><th class="r">Cal</th>
+          <th class="r mh">P</th><th class="r mh">C</th><th class="r mh">F</th><th></th>
+        </tr></thead>
+        <tbody id="rowsBody"></tbody>
+      </table>
+    </div>
+    ${hasRows?`
+    <div class="stats" style="margin-top:16px">
+      <div class="tile hero"><div class="k">Total calories</div><div class="v num">${fmt(total)}<small>kcal</small></div></div>
+      <div class="tile"><div class="k">Protein</div><div class="v num" style="color:var(--pro)">${fmt(M.p)}<small>g</small></div></div>
+      <div class="tile"><div class="k">Carbs</div><div class="v num" style="color:var(--carb)">${fmt(M.c)}<small>g</small></div></div>
+      <div class="tile"><div class="k">Fat</div><div class="v num" style="color:var(--fat)">${fmt(M.f)}<small>g</small></div></div>
+      <div class="tile"><div class="k">Raw weight</div><div class="v num">${fmt(raw)}<small>g</small></div></div>
+    </div>`:'<div class="empty">No ingredients yet. Enter a recipe above and select <b>Analyze recipe</b>.</div>'}
+  </section>
+
+  <section class="card">
+    <p class="eyebrow">Step 3 &middot; After cooking</p>
+    <h2>Cooked weight</h2>
+    <p class="sub">A dish gains or loses water as it cooks, changing its weight. Weigh the finished dish and save the value to set its calorie density for portioning.</p>
+    <div class="field">
+      <div class="input-g">
+        <input type="number" id="cookedInput" min="0" step="1" placeholder="e.g. 640" value="${t.cooked??''}">
+        <span class="suffix">grams</span>
+      </div>
+      <button class="btn primary" id="saveCookedBtn">Save cooked weight</button>
+    </div>
+    ${density!=null?`
+      <div class="stats" style="margin-top:16px">
+        <div class="tile"><div class="k">Calorie density</div><div class="v num">${round(density,2)}<small>kcal/g</small></div></div>
+        <div class="tile"><div class="k">Per 100 g cooked</div><div class="v num">${fmt(density*100)}<small>kcal</small></div></div>
+        <div class="tile"><div class="k">Whole dish</div><div class="v num">${fmt(total)}<small>kcal / ${fmt(t.cooked)} g</small></div></div>
+      </div>
+      <div class="macro-chips">
+        ${mchip('Protein',M.p/t.cooked*100,'pro')}${mchip('Carbs',M.c/t.cooked*100,'carb')}${mchip('Fat',M.f/t.cooked*100,'fat')}
+        <span class="chip-note">per 100 g cooked</span>
+      </div>`:'<div class="note">Save a cooked weight to enable portion tracking below. Saved values remain until you change or delete them.</div>'}
+  </section>
+
+  <section class="card">
+    <p class="eyebrow">Step 4 &middot; Serving</p>
+    <h2>Portion calculator</h2>
+    <p class="sub">Enter the weight of your serving to calculate its calories and macros. Log it to track the remainder of the dish.</p>
+    ${density!=null?`
+      <div class="field">
+        <div class="input-g">
+          <input type="number" id="portionInput" min="0" step="1" placeholder="serving weight">
+          <span class="suffix">grams</span>
+        </div>
+        <button class="btn" id="logPortionBtn">Log portion</button>
+      </div>
+      <div class="portion-out" id="portionOut">
+        <span class="lbl">Enter a weight to calculate its nutrition.</span>
+      </div>
+      ${renderLog(t,density,M)}
+    `:'<p class="disabled-hint">Save a cooked weight in Step 3 to enable portion calculations.</p>'}
+  </section>`;
+
+  renderRows();
+  wire();
+}
+
+function renderLog(t,density,M){
+  const pd=M.p/t.cooked, cd=M.c/t.cooked, fd=M.f/t.cooked;
+  const eatenG = t.eaten.reduce((s,e)=>s+(+e.grams||0),0);
+  const eatenK = t.eaten.reduce((s,e)=>s+(+e.kcal||0),0);
+  const remainG = Math.max(0, t.cooked - eatenG);
+  const remainK = Math.max(0, remainG*density);
+  let items = t.eaten.slice().reverse().map(e=>`
+    <div class="log-item" data-eid="${e.id}">
+      <div>
+        <span class="li-g num">${fmt(e.grams)} g</span> <span class="li-t">${e.label||''}</span>
+        <div class="li-macros num">P ${fmt(e.p||0)}g &middot; C ${fmt(e.c||0)}g &middot; F ${fmt(e.f||0)}g</div>
+      </div>
+      <div><span class="li-k num">${fmt(e.kcal)} kcal</span>
+      <button class="li-x" data-del-eaten="${e.id}" title="Remove">×</button></div>
+    </div>`).join("");
+  return `
+  <div class="log">
+    <h3>Eaten log &mdash; ${t.eaten.length} portion${t.eaten.length===1?'':'s'} &middot; ${fmt(eatenK)} kcal from this dish</h3>
+    ${items||'<div class="disabled-hint" style="padding:4px 0 8px">No portions logged yet.</div>'}
+    <div class="remain">
+      <div class="tile"><div class="k">Remaining weight</div><div class="v num">${fmt(remainG)}<small>g left</small></div></div>
+      <div class="tile"><div class="k">Remaining calories</div><div class="v num">${fmt(remainK)}<small>kcal left</small></div></div>
+    </div>
+    <div class="macro-chips">
+      ${mchip('Protein',remainG*pd,'pro')}${mchip('Carbs',remainG*cd,'carb')}${mchip('Fat',remainG*fd,'fat')}
+      <span class="chip-note">remaining in dish</span>
+    </div>
+  </div>`;
+}
+
+function renderRows(){
+  const t=activeTab();
+  const body=document.getElementById("rowsBody");
+  if(!body) return;
+  if(!t.rows.length){ body.innerHTML=`<tr><td colspan="7" class="empty">No ingredients yet.</td></tr>`; return; }
+  body.innerHTML="";
+  t.rows.forEach(r=>{
+    const tr=document.createElement("tr");
+    if(!r.matched && !r.manual) tr.className="unmatched";
+    const badge = r.matched ? '<span class="badge ok">matched</span>'
+                : r.manual ? '' : '<span class="badge warn">set calories</span>';
+    const m=rowMacros(r);
+    const hasG = r.grams!=null;
+    tr.innerHTML=`
+      <td>
+        <div class="ing-name">${escapeHtml(r.name)} ${badge}</div>
+        ${r.amt?`<div class="ing-amt">${escapeHtml(r.amt)}</div>`:''}
+      </td>
+      <td class="r"><input class="cellinput num" data-g="${r.id}" type="number" min="0" step="0.1" value="${r.grams??''}" placeholder="—"><span class="unit">g</span></td>
+      <td class="r"><input class="cellinput num" data-k="${r.id}" type="number" min="0" step="1" value="${round(r.kcal,1)}"><span class="unit">kcal</span></td>
+      <td class="r macro pro">${hasG&&r.p100!=null?fmt(m.p):'—'}</td>
+      <td class="r macro carb">${hasG&&r.c100!=null?fmt(m.c):'—'}</td>
+      <td class="r macro fat">${hasG&&r.f100!=null?fmt(m.f):'—'}</td>
+      <td class="r"><button class="del" data-del="${r.id}" title="Remove">×</button></td>`;
+    body.appendChild(tr);
+  });
+}
+
+/* ---------- events ---------- */
+function wire(){
+  const t=activeTab();
+
+  // daily goals
+  const goalMap={goalCal:"cal",goalP:"p",goalC:"c",goalF:"f"};
+  Object.entries(goalMap).forEach(([id,key])=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.addEventListener("change",()=>{ state.goals[key]=Math.max(0,+el.value||0); save(); render(); });
+  });
+
+  const ta=document.getElementById("recipeText");
+  ta && ta.addEventListener("change",()=>{ t.raw=ta.value; save(); });
+
+  document.getElementById("analyzeBtn").addEventListener("click",()=>{
+    t.raw=ta.value;
+    const parsed=t.raw.split("\n").map(parseLine).filter(Boolean);
+    t.rows=parsed; save(); render();
+  });
+  document.getElementById("addRowBtn").addEventListener("click",()=>{
+    t.rows.push({id:uid(),name:"New ingredient",amt:"",grams:0,kc100:null,kcal:0,matched:false,manual:true});
+    save(); render();
+  });
+  const clr=document.getElementById("clearRowsBtn");
+  clr && clr.addEventListener("click",()=>{
+    askConfirm("Clear ingredients?","Removes every ingredient row in this tab. Your recipe text and cooked weight stay.",()=>{
+      t.rows=[]; save(); render();
+    });
+  });
+
+  // row inputs
+  document.querySelectorAll("[data-g]").forEach(inp=>{
+    inp.addEventListener("input",()=>{
+      const r=t.rows.find(x=>x.id===inp.dataset.g); if(!r) return;
+      r.grams = inp.value===""?null:+inp.value;
+      if(r.kc100!=null && r.grams!=null){ r.kcal=round(r.grams*r.kc100/100,1);
+        const ki=document.querySelector(`[data-k="${r.id}"]`); if(ki) ki.value=r.kcal; }
+      save(); updateTotals();
+    });
+  });
+  document.querySelectorAll("[data-k]").forEach(inp=>{
+    inp.addEventListener("input",()=>{
+      const r=t.rows.find(x=>x.id===inp.dataset.k); if(!r) return;
+      r.kcal = inp.value===""?0:+inp.value;
+      r.kc100=null; r.manual=true; // manual override; stop auto-recalc
+      save(); updateTotals();
+    });
+  });
+  document.querySelectorAll("[data-del]").forEach(b=>{
+    b.addEventListener("click",()=>{ t.rows=t.rows.filter(x=>x.id!==b.dataset.del); save(); render(); });
+  });
+
+  // cooked
+  document.getElementById("saveCookedBtn").addEventListener("click",()=>{
+    const v=+document.getElementById("cookedInput").value;
+    t.cooked = v>0? v : null; save(); render();
+  });
+
+  // portion
+  const pin=document.getElementById("portionInput");
+  if(pin){
+    const cooked=t.cooked||0;
+    const M=tabMacros(t);
+    const density = cooked>0 ? tabKcal(t)/cooked : 0;
+    const pd=cooked>0?M.p/cooked:0, cd=cooked>0?M.c/cooked:0, fd=cooked>0?M.f/cooked:0;
+    const out=document.getElementById("portionOut");
+    const upd=()=>{
+      const w=+pin.value;
+      if(w>0){ out.innerHTML=`<span class="big num">${fmt(w*density)}</span><span class="lbl">kcal in ${fmt(w)} g</span>
+        <div class="macro-chips" style="width:100%">${mchip('Protein',w*pd,'pro')}${mchip('Carbs',w*cd,'carb')}${mchip('Fat',w*fd,'fat')}</div>`; }
+      else out.innerHTML=`<span class="lbl">Enter a weight to calculate its nutrition.</span>`;
+    };
+    pin.addEventListener("input",upd);
+    document.getElementById("logPortionBtn").addEventListener("click",()=>{
+      const w=+pin.value; if(!(w>0))return;
+      const now=new Date();
+      t.eaten.push({id:uid(),grams:round(w,1),kcal:round(w*density,1),
+        p:round(w*pd,1),c:round(w*cd,1),f:round(w*fd,1),ts:Date.now(),
+        label:now.toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})});
+      save(); render();
+    });
+    document.querySelectorAll("[data-del-eaten]").forEach(b=>{
+      b.addEventListener("click",()=>{ t.eaten=t.eaten.filter(e=>e.id!==b.dataset.delEaten); save(); render(); });
+    });
+  }
+}
+
+function updateTotals(){ render(); }
+
+function deleteTab(t){
+  if(state.tabs.length===1){
+    askConfirm("Delete this recipe?","This is your only tab. Deleting it clears its recipe, calories, cooked weight and log.",()=>{
+      state.tabs=[]; const s=seed(); s.tabs[0].name="New recipe"; s.tabs[0].raw=""; s.tabs[0].rows=[]; s.tabs[0].cooked=null; s.tabs[0].eaten=[];
+      state.tabs=s.tabs; state.activeTabId=s.tabs[0].id; save(); render();
+    });
+    return;
+  }
+  askConfirm("Delete "+t.name+"?","This removes its recipe, calories, cooked weight and eaten log permanently.",()=>{
+    const idx=state.tabs.findIndex(x=>x.id===t.id);
+    state.tabs=state.tabs.filter(x=>x.id!==t.id);
+    if(state.activeTabId===t.id) state.activeTabId=state.tabs[Math.max(0,idx-1)].id;
+    save(); render();
+  });
+}
+
+/* confirm dialog */
+const dlg=document.getElementById("confirm");
+let onOk=null;
+function askConfirm(title,msg,cb){
+  document.getElementById("cf-title").textContent=title;
+  document.getElementById("cf-msg").textContent=msg;
+  onOk=cb;
+  if(typeof dlg.showModal==="function") dlg.showModal();
+  else { if(confirm(msg)) cb(); }
+}
+document.getElementById("cf-ok").addEventListener("click",()=>{ dlg.close(); onOk&&onOk(); });
+document.getElementById("cf-cancel").addEventListener("click",()=>dlg.close());
+
+/* theme toggle (per-viewer convenience) */
+const themeBtn=document.getElementById("themeBtn");
+function applyTheme(v){ if(v==="dark"||v==="light") document.documentElement.setAttribute("data-theme",v); else document.documentElement.removeAttribute("data-theme"); }
+try{ const saved=localStorage.getItem("chefcalorie.theme"); if(saved) applyTheme(saved); }catch(e){}
+themeBtn.addEventListener("click",()=>{
+  const cur=document.documentElement.getAttribute("data-theme");
+  const prefersDark=matchMedia("(prefers-color-scheme:dark)").matches;
+  const next = cur? (cur==="dark"?"light":"dark") : (prefersDark?"light":"dark");
+  applyTheme(next); try{localStorage.setItem("chefcalorie.theme",next);}catch(e){}
+});
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+render();
+</script>
