@@ -175,6 +175,27 @@
   dialog p{margin:0 0 16px;color:var(--muted);font-size:14px}
   dialog .dlg-actions{display:flex;gap:9px;justify-content:flex-end}
 
+  /* row tools + custom name + label */
+  .rowtools{white-space:nowrap;display:flex;gap:5px;justify-content:flex-end;align-items:center}
+  .lblbtn{border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);font-size:11px;font-weight:700;
+    padding:5px 9px;border-radius:7px;line-height:1}
+  .lblbtn:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+  .nameinput{border:1px solid var(--line-strong);background:var(--surface-2);border-radius:7px;padding:5px 8px;font:inherit;
+    font-weight:600;font-size:14px;color:inherit;width:150px;max-width:100%;outline:none}
+  .nameinput:focus{border-color:var(--accent);background:var(--surface)}
+  .badge.lbl{background:var(--pro-soft);color:var(--pro)}
+  #labelDlg{max-width:360px}
+  .lb-for{font-weight:700;margin:0 0 4px;color:var(--accent);font-size:15px}
+  .lb-hint{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.5}
+  .lb-grid{display:grid;gap:10px}
+  .lb-grid label{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;font-weight:700}
+  .lb-in{position:relative;display:inline-flex;align-items:center}
+  .lb-in input{width:120px;border:1px solid var(--line-strong);background:var(--surface-2);border-radius:8px;
+    padding:8px 32px 8px 10px;font-size:15px;font-variant-numeric:tabular-nums;color:inherit;outline:none}
+  .lb-in input:focus{border-color:var(--accent);background:var(--surface)}
+  .lb-in i{position:absolute;right:9px;font-style:normal;color:var(--muted);font-size:12px;font-weight:600}
+  .lb-err{color:var(--accent);font-size:12.5px;font-weight:600;margin:12px 0 0}
+
   /* daily goals */
   .goals-card .goals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px 22px;margin-top:14px}
   .goal-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
@@ -251,6 +272,24 @@
   </div>
 </dialog>
 
+<dialog id="labelDlg">
+  <h3>Nutrition label</h3>
+  <p class="lb-for" id="lb-for"></p>
+  <p class="lb-hint">Enter the numbers printed on the product's Nutrition Facts label for <b>one serving</b>. The app converts them to per-gram values and uses them for this ingredient, overriding the database estimate.</p>
+  <div class="lb-grid">
+    <label>Serving size<span class="lb-in"><input type="number" id="lb-serv" min="0" inputmode="decimal"><i>g</i></span></label>
+    <label>Calories<span class="lb-in"><input type="number" id="lb-cal" min="0" inputmode="decimal"><i>kcal</i></span></label>
+    <label>Protein<span class="lb-in"><input type="number" id="lb-p" min="0" inputmode="decimal"><i>g</i></span></label>
+    <label>Carbs<span class="lb-in"><input type="number" id="lb-c" min="0" inputmode="decimal"><i>g</i></span></label>
+    <label>Fat<span class="lb-in"><input type="number" id="lb-f" min="0" inputmode="decimal"><i>g</i></span></label>
+  </div>
+  <p class="lb-err" id="lb-err" hidden>Enter the serving size in grams (from the label).</p>
+  <div class="dlg-actions">
+    <button class="btn sm" id="lb-cancel">Cancel</button>
+    <button class="btn primary sm" id="lb-apply">Apply to ingredient</button>
+  </div>
+</dialog>
+
 <script>
 /* ============================================================
    CHEF CALORIE  — calorie engine + app
@@ -275,7 +314,7 @@ const WT = { // grams per unit
   oz:28.35, ounce:28.35, ounces:28.35,
   lb:453.592, lbs:453.592, pound:453.592, pounds:453.592,
 };
-const COUNT = new Set(["clove","cloves","piece","pieces","pcs","pc","pce","whole",
+const COUNT = new Set(["clove","cloves","piece","pieces","pcs","pc","pce",
   "stalk","stalks","sprig","sprigs","head","heads","bunch","bunches","stick","sticks",
   "fillet","fillets","can","cans","slice","slices","strip","strips","leaf","leaves",
   "rib","ribs","ear","ears","fruit"]);
@@ -331,7 +370,8 @@ const DB = [
   {n:["chipotle in adobo","chipotle peppers in adobo","chipotle","chipotles"],kc:82,p:3,c:13,f:2.5,d:1.0,ea:18},
   {n:["peanut butter"],kc:588,p:25,c:20,f:50,d:1.08},
   {n:["salsa"],kc:36,p:1.5,c:7,f:0.2,d:1.03},
-  {n:["coconut milk"],kc:230,p:2.3,c:6,f:24,d:0.99},
+  {n:["light coconut milk","lite coconut milk","coconut milk lite","coconut milk light","low fat coconut milk"],kc:73,p:0.7,c:2,f:7,d:1.0},
+  {n:["coconut milk","coconut milk regular","full fat coconut milk"],kc:230,p:2.3,c:6,f:24,d:0.99},
   {n:["coconut cream"],kc:330,p:3.6,c:6.6,f:34,d:1.0},
 
   // Vinegars & acids
@@ -456,6 +496,7 @@ const DB = [
   // Proteins
   {n:["chicken breast","chicken breasts"],kc:165,p:31,c:0,f:3.6,d:1.0,ea:174},
   {n:["chicken thigh","chicken thighs"],kc:209,p:26,c:0,f:11,d:1.0,ea:110},
+  {n:["whole chicken","roast chicken","rotisserie chicken"],kc:190,p:29,c:0,f:7.5,d:1.0,ea:1600},
   {n:["chicken","chicken meat"],kc:190,p:29,c:0,f:7.5,d:1.0},
   {n:["ground beef","minced beef","beef mince","hamburger"],kc:250,p:26,c:0,f:15,d:1.0},
   {n:["beef","steak","beef steak","sirloin"],kc:271,p:25,c:0,f:19,d:1.0},
@@ -1002,11 +1043,11 @@ function render(){
     </div>
     ${hasRows?`
     <div class="stats" style="margin-top:16px">
-      <div class="tile hero"><div class="k">Total calories</div><div class="v num">${fmt(total)}<small>kcal</small></div></div>
-      <div class="tile"><div class="k">Protein</div><div class="v num" style="color:var(--pro)">${fmt(M.p)}<small>g</small></div></div>
-      <div class="tile"><div class="k">Carbs</div><div class="v num" style="color:var(--carb)">${fmt(M.c)}<small>g</small></div></div>
-      <div class="tile"><div class="k">Fat</div><div class="v num" style="color:var(--fat)">${fmt(M.f)}<small>g</small></div></div>
-      <div class="tile"><div class="k">Raw weight</div><div class="v num">${fmt(raw)}<small>g</small></div></div>
+      <div class="tile hero"><div class="k">Total calories</div><div class="v num" id="sumCal">${fmt(total)}<small>kcal</small></div></div>
+      <div class="tile"><div class="k">Protein</div><div class="v num" id="sumP" style="color:var(--pro)">${fmt(M.p)}<small>g</small></div></div>
+      <div class="tile"><div class="k">Carbs</div><div class="v num" id="sumC" style="color:var(--carb)">${fmt(M.c)}<small>g</small></div></div>
+      <div class="tile"><div class="k">Fat</div><div class="v num" id="sumF" style="color:var(--fat)">${fmt(M.f)}<small>g</small></div></div>
+      <div class="tile"><div class="k">Raw weight</div><div class="v num" id="sumRaw">${fmt(raw)}<small>g</small></div></div>
     </div>`:'<div class="empty">No ingredients yet. Enter a recipe above and select <b>Analyze recipe</b>.</div>'}
   </section>
 
@@ -1094,22 +1135,29 @@ function renderRows(){
   body.innerHTML="";
   t.rows.forEach(r=>{
     const tr=document.createElement("tr");
-    if(!r.matched && !r.manual) tr.className="unmatched";
-    const badge = r.matched ? '<span class="badge ok">matched</span>'
-                : r.manual ? '' : '<span class="badge warn">set calories</span>';
+    if(!r.matched && !r.custom && !r.fromLabel) tr.className="unmatched";
+    const badge = r.fromLabel ? '<span class="badge lbl">label</span>'
+                : r.matched ? '<span class="badge ok">matched</span>'
+                : (r.custom||r.manual) ? '' : '<span class="badge warn">set calories</span>';
     const m=rowMacros(r);
     const hasG = r.grams!=null;
+    const nameCell = r.custom
+      ? `<input class="nameinput" data-name="${r.id}" value="${escapeHtml(r.name)}" placeholder="Ingredient name" autocomplete="off"> ${badge}`
+      : `${escapeHtml(r.name)} ${badge}`;
     tr.innerHTML=`
       <td>
-        <div class="ing-name">${escapeHtml(r.name)} ${badge}</div>
+        <div class="ing-name">${nameCell}</div>
         ${r.amt?`<div class="ing-amt">${escapeHtml(r.amt)}</div>`:''}
       </td>
-      <td class="r"><input class="cellinput num" data-g="${r.id}" type="number" min="0" step="0.1" value="${r.grams??''}" placeholder="—"><span class="unit">g</span></td>
-      <td class="r"><input class="cellinput num" data-k="${r.id}" type="number" min="0" step="1" value="${round(r.kcal,1)}"><span class="unit">kcal</span></td>
-      <td class="r macro pro">${hasG&&r.p100!=null?fmt(m.p):'—'}</td>
-      <td class="r macro carb">${hasG&&r.c100!=null?fmt(m.c):'—'}</td>
-      <td class="r macro fat">${hasG&&r.f100!=null?fmt(m.f):'—'}</td>
-      <td class="r"><button class="del" data-del="${r.id}" title="Remove">×</button></td>`;
+      <td class="r"><input class="cellinput num" data-g="${r.id}" type="number" inputmode="decimal" min="0" step="0.1" value="${r.grams??''}" placeholder="—"><span class="unit">g</span></td>
+      <td class="r"><input class="cellinput num" data-k="${r.id}" type="number" inputmode="decimal" min="0" step="1" placeholder="0" value="${(r.custom && !r.matched && !r.fromLabel && !r.kcal)?'':round(r.kcal,1)}"><span class="unit">kcal</span></td>
+      <td class="r macro pro" data-mp="${r.id}">${hasG&&r.p100!=null?fmt(m.p):'—'}</td>
+      <td class="r macro carb" data-mc="${r.id}">${hasG&&r.c100!=null?fmt(m.c):'—'}</td>
+      <td class="r macro fat" data-mf="${r.id}">${hasG&&r.f100!=null?fmt(m.f):'—'}</td>
+      <td class="r rowtools">
+        <button class="lblbtn" data-label="${r.id}" title="Enter values from the product's nutrition label">Label</button>
+        <button class="del" data-del="${r.id}" title="Remove">×</button>
+      </td>`;
     body.appendChild(tr);
   });
 }
@@ -1134,8 +1182,9 @@ function wire(){
     t.rows=parsed; save(); render();
   });
   document.getElementById("addRowBtn").addEventListener("click",()=>{
-    t.rows.push({id:uid(),name:"New ingredient",amt:"",grams:0,kc100:null,kcal:0,matched:false,manual:true});
+    t.rows.push({id:uid(),name:"",amt:"",grams:null,kc100:null,p100:null,c100:null,f100:null,kcal:0,matched:false,manual:false,custom:true});
     save(); render();
+    const inp=document.querySelector(`[data-name="${t.rows[t.rows.length-1].id}"]`); if(inp) inp.focus();
   });
   const clr=document.getElementById("clearRowsBtn");
   clr && clr.addEventListener("click",()=>{
@@ -1144,26 +1193,56 @@ function wire(){
     });
   });
 
-  // row inputs
+  // Full re-render only once focus has left the ingredient grid, so typing multiple
+  // digits is never interrupted (the previous version re-rendered on every keystroke).
+  const softRender=()=>setTimeout(()=>{
+    const a=document.activeElement;
+    if(a && a.dataset && (a.dataset.g||a.dataset.k||a.dataset.name)) return;
+    render();
+  },0);
+
+  // weight edits — update totals and this row's macros in place
   document.querySelectorAll("[data-g]").forEach(inp=>{
     inp.addEventListener("input",()=>{
       const r=t.rows.find(x=>x.id===inp.dataset.g); if(!r) return;
       r.grams = inp.value===""?null:+inp.value;
       if(r.kc100!=null && r.grams!=null){ r.kcal=round(r.grams*r.kc100/100,1);
         const ki=document.querySelector(`[data-k="${r.id}"]`); if(ki) ki.value=r.kcal; }
-      save(); updateTotals();
+      updateRowMacros(r); refreshSummary(); save();
     });
+    inp.addEventListener("change",softRender);
   });
+  // calorie edits — manual override, keep totals live
   document.querySelectorAll("[data-k]").forEach(inp=>{
     inp.addEventListener("input",()=>{
       const r=t.rows.find(x=>x.id===inp.dataset.k); if(!r) return;
       r.kcal = inp.value===""?0:+inp.value;
-      r.kc100=null; r.manual=true; // manual override; stop auto-recalc
-      save(); updateTotals();
+      r.kc100=null; if(!r.fromLabel) r.manual=true; // stop auto-recalc
+      refreshSummary(); save();
+    });
+    inp.addEventListener("change",softRender);
+  });
+  // custom-ingredient names — auto-match the database on blur
+  document.querySelectorAll("[data-name]").forEach(inp=>{
+    inp.addEventListener("input",()=>{
+      const r=t.rows.find(x=>x.id===inp.dataset.name); if(!r) return;
+      r.name=inp.value; save();
+    });
+    inp.addEventListener("change",()=>{
+      const r=t.rows.find(x=>x.id===inp.dataset.name); if(!r) return;
+      if(!r.fromLabel && !r.manual && r.name.trim()){
+        const ing=findIngredient(r.name.toLowerCase().replace(/ñ/g,"n").split(/\s+/));
+        if(ing){ r.kc100=ing.kc; r.p100=ing.p; r.c100=ing.c; r.f100=ing.f; r.matched=true;
+          if(r.grams!=null) r.kcal=round(r.grams*ing.kc/100,1); }
+      }
+      save(); softRender();
     });
   });
   document.querySelectorAll("[data-del]").forEach(b=>{
     b.addEventListener("click",()=>{ t.rows=t.rows.filter(x=>x.id!==b.dataset.del); save(); render(); });
+  });
+  document.querySelectorAll("[data-label]").forEach(b=>{
+    b.addEventListener("click",()=>openLabelDialog(b.dataset.label));
   });
 
   // cooked
@@ -1201,7 +1280,24 @@ function wire(){
   }
 }
 
-function updateTotals(){ render(); }
+/* lightweight in-place updates used while editing cells (no re-render, keeps focus) */
+function refreshSummary(){
+  const t=activeTab(), M=tabMacros(t);
+  const set=(id,html)=>{const el=document.getElementById(id); if(el) el.innerHTML=html;};
+  set('sumCal', fmt(tabKcal(t))+'<small>kcal</small>');
+  set('sumP', fmt(M.p)+'<small>g</small>');
+  set('sumC', fmt(M.c)+'<small>g</small>');
+  set('sumF', fmt(M.f)+'<small>g</small>');
+  set('sumRaw', fmt(tabGrams(t))+'<small>g</small>');
+  const kc=document.querySelector('.tab.active .kc'); if(kc) kc.textContent=fmt(tabKcal(t))+' kcal';
+}
+function updateRowMacros(r){
+  const m=rowMacros(r), hasG=r.grams!=null;
+  const cell=(attr,val,ok)=>{const el=document.querySelector(`[${attr}="${r.id}"]`); if(el) el.textContent = ok?fmt(val):'—';};
+  cell('data-mp',m.p,hasG&&r.p100!=null);
+  cell('data-mc',m.c,hasG&&r.c100!=null);
+  cell('data-mf',m.f,hasG&&r.f100!=null);
+}
 
 function deleteTab(t){
   if(state.tabs.length===1){
@@ -1231,6 +1327,38 @@ function askConfirm(title,msg,cb){
 }
 document.getElementById("cf-ok").addEventListener("click",()=>{ dlg.close(); onOk&&onOk(); });
 document.getElementById("cf-cancel").addEventListener("click",()=>dlg.close());
+
+/* nutrition-label entry (per-ingredient override) */
+const labelDlg=document.getElementById("labelDlg");
+let labelRowId=null;
+function openLabelDialog(rowId){
+  const r=activeTab().rows.find(x=>x.id===rowId); if(!r) return;
+  labelRowId=rowId;
+  document.getElementById("lb-for").textContent = (r.name&&r.name.trim()) ? r.name : "This ingredient";
+  const L=r.label||{};
+  document.getElementById("lb-serv").value = L.serving??"";
+  document.getElementById("lb-cal").value = L.cal??"";
+  document.getElementById("lb-p").value = L.p??"";
+  document.getElementById("lb-c").value = L.c??"";
+  document.getElementById("lb-f").value = L.f??"";
+  document.getElementById("lb-err").hidden = true;
+  if(typeof labelDlg.showModal==="function") labelDlg.showModal();
+}
+document.getElementById("lb-cancel").addEventListener("click",()=>labelDlg.close());
+document.getElementById("lb-apply").addEventListener("click",()=>{
+  const r=activeTab().rows.find(x=>x.id===labelRowId); if(!r){ labelDlg.close(); return; }
+  const serving=+document.getElementById("lb-serv").value;
+  if(!(serving>0)){ document.getElementById("lb-err").hidden=false; document.getElementById("lb-serv").focus(); return; }
+  const cal=+document.getElementById("lb-cal").value||0;
+  const p=+document.getElementById("lb-p").value||0;
+  const c=+document.getElementById("lb-c").value||0;
+  const f=+document.getElementById("lb-f").value||0;
+  r.label={serving,cal,p,c,f};
+  r.kc100=cal/serving*100; r.p100=p/serving*100; r.c100=c/serving*100; r.f100=f/serving*100;
+  r.fromLabel=true; r.matched=false; r.manual=false;
+  r.kcal = r.grams!=null ? round(r.grams*r.kc100/100,1) : 0;
+  save(); labelDlg.close(); render();
+});
 
 /* theme toggle (per-viewer convenience) */
 const themeBtn=document.getElementById("themeBtn");
